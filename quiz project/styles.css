@@ -1,0 +1,103 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f0f2f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.quiz-container {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+}
+
+h1 {
+    font-size: 2em;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+#question-text {
+    font-size: 1.5em;
+    margin-bottom: 25px;
+    color: #555;
+}
+
+#options-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+#options-container button {
+    padding: 15px;
+    border: none;
+    border-radius: 10px;
+    background-color: #007bff;
+    color: #fff;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#options-container button:hover {
+    background-color: #0056b3;
+}
+
+#feedback-container {
+    margin-top: 25px;
+    font-weight: bold;
+    color: #007bff;
+    min-height: 20px; /* Ensure consistent height */
+}
+
+.button-container {
+    display: flex;
+    justify-content: flex-end; /* Align buttons to the right */
+    gap: 10px; /* Add some space between buttons if needed */
+    margin-top: 25px;
+}
+
+#next-button, #restart-button {
+    padding: 15px 30px;
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+    display: none; /* Initially hidden */
+}
+
+#next-button:hover, #restart-button:hover {
+    background-color: #218838;
+}
+
+#progress-container {
+    margin-top: 25px;
+    font-size: 1em;
+    color: #777;
+}
+
+#progress-bar-container {
+    width: 100%;
+    background-color: #e0e0e0;
+    border-radius: 10px;
+    margin-top: 10px;
+}
+
+#progress-bar {
+    height: 10px;
+    background-color: #007bff;
+    width: 0%;
+    border-radius: 10px;
+    transition: width 0.3s ease;
+}
