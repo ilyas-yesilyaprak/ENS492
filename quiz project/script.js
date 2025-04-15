@@ -203,20 +203,10 @@ const questions = {
       }
     ]
   };
-  
-  const platformDisplayNames = {
-    facebook: "Facebook",
-    instagram: "Instagram",
-    twitter: "X (Twitter)",
-    linkedin: "LinkedIn",
-    tiktok: "TikTok",
-    snapchat: "Snapchat"
-  };
-  
   let currentQuestionIndex = 0;
   let score = 0;
-  let selectedPlatform = null;
   let platformQuestions = [];
+  let selectedPlatformsNames = [];  // For result display
   
   // DOM Elements
   const questionText = document.getElementById("question-text");
@@ -228,41 +218,50 @@ const questions = {
   const currentQuestionElement = document.getElementById("current-question");
   const totalQuestionsElement = document.getElementById("total-questions");
   
-  // Initialize Quiz
   function startQuiz() {
-    // First question: Ask the user to select a platform
     showPlatformSelection();
   }
   
-  // Display Platform Selection
   function showPlatformSelection() {
-    questionText.textContent = "Which social media platform do you use most frequently?";
+    questionText.textContent = "Select the social media platforms you use:";
     optionsContainer.innerHTML = "";
   
-    const platforms = Object.keys(questions); // Get all platforms (facebook, instagram, twitter, etc.)
-    platforms.forEach((platform) => {
-      const button = document.createElement("button");
-      button.textContent = platform.charAt(0).toUpperCase() + platform.slice(1); // Capitalize platform name
-      button.addEventListener("click", () => selectPlatform(platform));
-      optionsContainer.appendChild(button);
+    const platforms = Object.keys(questions);
+    platforms.forEach(platform => {
+      const label = document.createElement("label");
+      label.style.display = "block";
+      label.innerHTML = `<input type="checkbox" value="${platform}"> ${platform.charAt(0).toUpperCase() + platform.slice(1)}`;
+      optionsContainer.appendChild(label);
     });
+  
+    const submitButton = document.createElement("button");
+    submitButton.classList.add("start-quiz-button");
+    submitButton.textContent = "Start Quiz";
+    submitButton.addEventListener("click", () => {
+      const selected = Array.from(optionsContainer.querySelectorAll('input:checked')).map(e => e.value);
+      if (selected.length > 0) {
+        selectPlatforms(selected);
+      }
+    });
+    optionsContainer.appendChild(submitButton);
   }
   
-  // Handle Platform Selection
-  function selectPlatform(platform) {
-    selectedPlatform = platform;
-    platformQuestions = shuffleArray(questions[platform]); // Shuffle platform-specific questions
+  function selectPlatforms(selectedPlatforms) {
+    selectedPlatformsNames = selectedPlatforms.map(p => p.charAt(0).toUpperCase() + p.slice(1));
+    platformQuestions = selectedPlatforms.flatMap(p => questions[p]);
+    platformQuestions = shuffleArray(platformQuestions);
     totalQuestionsElement.textContent = platformQuestions.length;
     showQuestion();
   }
   
-  // Display Question and Options
   function showQuestion() {
     const currentQuestion = platformQuestions[currentQuestionIndex];
     questionText.textContent = currentQuestion.question;
-    optionsContainer.innerHTML = ""; // Clear previous options
+    optionsContainer.innerHTML = "";
   
-    currentQuestion.options.forEach((option) => {
+    const shuffledOptions = shuffleArray([...currentQuestion.options]);
+  
+    shuffledOptions.forEach(option => {
       const button = document.createElement("button");
       button.textContent = option;
       button.addEventListener("click", () => checkAnswer(option));
@@ -270,63 +269,69 @@ const questions = {
     });
   
     currentQuestionElement.textContent = currentQuestionIndex + 1;
-    updateProgressBar(); // Update the progress bar
+    updateProgressBar();
   }
   
-  // Check if the selected answer is correct
   function checkAnswer(selectedOption) {
     const currentQuestion = platformQuestions[currentQuestionIndex];
+    const buttons = optionsContainer.querySelectorAll("button");
+  
+    buttons.forEach(button => {
+      if (button.textContent === currentQuestion.correctAnswer) {
+        button.classList.add("correct");
+      }
+      if (button.textContent === selectedOption && selectedOption !== currentQuestion.correctAnswer) {
+        button.classList.add("incorrect");
+      }
+      button.disabled = true;
+    });
+  
     if (selectedOption === currentQuestion.correctAnswer) {
       feedbackContainer.textContent = "Correct! Well done.";
       score++;
     } else {
       feedbackContainer.textContent = `Incorrect. The correct answer is: ${currentQuestion.correctAnswer}`;
     }
-    nextButton.style.display = "block"; // Show Next button
+  
+    nextButton.style.display = "block";
   }
   
-  // Move to the next question
   function nextQuestion() {
     currentQuestionIndex++;
     if (currentQuestionIndex < platformQuestions.length) {
       showQuestion();
-      feedbackContainer.textContent = ""; // Clear feedback
-      nextButton.style.display = "none"; // Hide Next button
+      feedbackContainer.textContent = "";
+      nextButton.style.display = "none";
     } else {
       endQuiz();
     }
   }
   
-  // End of Quiz
   function endQuiz() {
     const percentageScore = (score / platformQuestions.length) * 100;
     questionText.textContent = `Quiz Over! Your score is ${score} out of ${platformQuestions.length}.`;
-    feedbackContainer.textContent = ""; // Clear feedback
-    scoreContainer.textContent = `You scored ${percentageScore.toFixed(2)}% on the ${selectedPlatform} quiz!`; // Display percentage with platform name
-    optionsContainer.innerHTML = ""; // Clear options
-    nextButton.style.display = "none"; // Hide Next button
-    restartButton.style.display = "block"; // Show restart button
+    feedbackContainer.textContent = "";
+    scoreContainer.textContent = `You scored ${percentageScore.toFixed(2)}%. Platforms: ${selectedPlatformsNames.join(", ")}`;
+    optionsContainer.innerHTML = "";
+    nextButton.style.display = "none";
+    restartButton.style.display = "block";
   }
   
-  // Restart Quiz
   function restartQuiz() {
     currentQuestionIndex = 0;
     score = 0;
-    selectedPlatform = null;
     platformQuestions = [];
-    scoreContainer.textContent = ""; // Clear score
+    scoreContainer.textContent = "";
     startQuiz();
-    restartButton.style.display = "none"; // Hide restart button
-    updateProgressBar(); // Reset progress bar
+    restartButton.style.display = "none";
+    updateProgressBar();
   }
   
-  // Update Progress Bar
   function updateProgressBar() {
     const progress = ((currentQuestionIndex + 1) / platformQuestions.length) * 100;
     document.getElementById("progress-bar").style.width = `${progress}%`;
   }
   
-  // Shuffle an array (Fisher-Yates algorithm)
   function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -335,5 +340,4 @@ const questions = {
     return array;
   }
   
-  // Start the quiz when the page loads
   startQuiz();
