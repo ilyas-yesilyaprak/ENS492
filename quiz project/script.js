@@ -10,11 +10,7 @@ const questions = {
         options: ["Use the 'Who can contact me' setting", "Block all friend requests", "Disable your account", "None of the above"],
         correctAnswer: "Use the 'Who can contact me' setting",
       },
-      {
-        question: "You want to post a photo on Facebook but don't want it to share your location. What should you do?",
-        options: ["Disable location services", "Turn on airplane mode", "Remove location metadata", "Both A and C"],
-        correctAnswer: "Remove location metadata",
-      },
+      
       {
         question: "How can you review what information of yours is visible to others on Facebook?",
         options: ["Check Activity Log", "Use 'View As' feature", "Download your data", "All of the above"],
@@ -52,11 +48,7 @@ const questions = {
         options: ["By reducing personalized ads", "By hiding your account", "By blocking all advertisers", "None of the above"],
         correctAnswer: "By reducing personalized ads",
       },
-      {
-        question: "How to prevent others from sharing your Instagram stories?",
-        options: ["Disable 'Allow Sharing'", "Set account to private", "Block users", "Both A and B"],
-        correctAnswer: "Both A and B"
-      },
+      
       {
         question: "What does 'Restrict' do on Instagram?",
         options: ["Hides comments from others", "Limits interactions without blocking", "Deletes offensive messages", "Reports the user"],
@@ -100,11 +92,7 @@ const questions = {
         options: ["Settings > Privacy > Ads", "Profile menu", "Direct Messages", "Tweet analytics"],
         correctAnswer: "Settings > Privacy > Ads"
       },
-      {
-        question: "What's the difference between mute and block?",
-        options: ["Mute hides content, block prevents interaction", "Both do the same", "Mute deletes messages", "Block reports users"],
-        correctAnswer: "Mute hides content, block prevents interaction"
-      },
+      
       {
         question: "How to make your Twitter/X Direct Messages private?",
         options: ["Allow messages from followers only", "Disable DMs completely", "Use encryption", "Delete message history"],
@@ -164,11 +152,11 @@ const questions = {
         options: ["Video Settings > Duet/Stitch permissions", "Block users", "Disable creativity tools", "Delete account"],
         correctAnswer: "Video Settings > Duet/Stitch permissions"
       },
-      {
-        question: "What happens when you block someone on TikTok?",
-        options: ["They can't view/interact with your content", "They get notified", "Your videos are deleted", "Both A and B"],
-        correctAnswer: "They can't view/interact with your content"
-      }
+        {
+            question: "How to limit who can send you messages on TikTok?",
+            options: ["Settings > Privacy > Direct Messages", "Block all users", "Disable messaging", "Delete the app"],
+            correctAnswer: "Settings > Privacy > Direct Messages"
+        }
     ],
     snapchat: [
       {
@@ -176,11 +164,7 @@ const questions = {
         options: ["Makes your profile invisible to friends", "Stops location sharing", "Hides your stories", "Deletes your account"],
         correctAnswer: "Stops location sharing",
       },
-      {
-        question: "A friend shares your location on Snapchat without your consent. What's the best action?",
-        options: ["Enable Ghost Mode", "Remove the friend", "Report the incident", "Both A and C"],
-        correctAnswer: "Both A and C",
-      },
+      
       {
         question: "How to set Snapchat Stories to 'Friends Only'?",
         options: ["Story Settings > Custom > Friends", "Block non-friends", "Use Ghost Mode", "Delete story"],
@@ -204,140 +188,153 @@ const questions = {
     ]
   };
   let currentQuestionIndex = 0;
-  let score = 0;
-  let platformQuestions = [];
-  let selectedPlatformsNames = [];  // For result display
-  
-  // DOM Elements
-  const questionText = document.getElementById("question-text");
-  const optionsContainer = document.getElementById("options-container");
-  const feedbackContainer = document.getElementById("feedback-container");
-  const scoreContainer = document.getElementById("score-container");
-  const nextButton = document.getElementById("next-button");
-  const restartButton = document.getElementById("restart-button");
-  const currentQuestionElement = document.getElementById("current-question");
-  const totalQuestionsElement = document.getElementById("total-questions");
-  
-  function startQuiz() {
-    showPlatformSelection();
+let score = 0;
+let platformQuestions = [];
+let selectedPlatformsNames = [];
+
+// DOM Elements
+const questionText = document.getElementById("question-text");
+const optionsContainer = document.getElementById("options-container");
+const feedbackContainer = document.getElementById("feedback-container");
+const scoreContainer = document.getElementById("score-container");
+const nextButton = document.getElementById("next-button");
+const restartButton = document.getElementById("restart-button");
+const currentQuestionElement = document.getElementById("current-question");
+const totalQuestionsElement = document.getElementById("total-questions");
+
+function startQuiz() {
+  showPlatformSelection();
+}
+
+function showPlatformSelection() {
+  questionText.textContent = "Select the social media platforms you use:";
+  optionsContainer.innerHTML = "";
+
+  const platforms = Object.keys(questions);
+  platforms.forEach(platform => {
+    const label = document.createElement("label");
+    label.style.display = "block";
+    label.innerHTML = `<input type="checkbox" value="${platform}"> ${platform.charAt(0).toUpperCase() + platform.slice(1)}`;
+    optionsContainer.appendChild(label);
+  });
+
+  const submitButton = document.createElement("button");
+  submitButton.classList.add("start-quiz-button");
+  submitButton.textContent = "Start Quiz";
+  submitButton.addEventListener("click", () => {
+    const selected = Array.from(optionsContainer.querySelectorAll('input:checked')).map(e => e.value);
+    if (selected.length > 0) {
+      selectPlatforms(selected);
+    }
+  });
+  optionsContainer.appendChild(submitButton);
+}
+
+function selectPlatforms(selectedPlatforms) {
+  // Store selected platform names
+  selectedPlatformsNames = selectedPlatforms.map(p => p.charAt(0).toUpperCase() + p.slice(1));
+
+  // Gather questions from selected platforms
+  let allQuestions = selectedPlatforms.flatMap(p => questions[p]);
+
+  // Shuffle and limit to 7 questions
+  platformQuestions = shuffleArray(allQuestions);
+  if (platformQuestions.length > 7) {
+    platformQuestions = platformQuestions.slice(0, 7);
   }
-  
-  function showPlatformSelection() {
-    questionText.textContent = "Select the social media platforms you use:";
-    optionsContainer.innerHTML = "";
-  
-    const platforms = Object.keys(questions);
-    platforms.forEach(platform => {
-      const label = document.createElement("label");
-      label.style.display = "block";
-      label.innerHTML = `<input type="checkbox" value="${platform}"> ${platform.charAt(0).toUpperCase() + platform.slice(1)}`;
-      optionsContainer.appendChild(label);
-    });
-  
-    const submitButton = document.createElement("button");
-    submitButton.classList.add("start-quiz-button");
-    submitButton.textContent = "Start Quiz";
-    submitButton.addEventListener("click", () => {
-      const selected = Array.from(optionsContainer.querySelectorAll('input:checked')).map(e => e.value);
-      if (selected.length > 0) {
-        selectPlatforms(selected);
-      }
-    });
-    optionsContainer.appendChild(submitButton);
+
+  // Update total questions display
+  totalQuestionsElement.textContent = platformQuestions.length;
+
+  // Show the first question
+  showQuestion();
+}
+
+function showQuestion() {
+  const currentQuestion = platformQuestions[currentQuestionIndex];
+  questionText.textContent = currentQuestion.question;
+  optionsContainer.innerHTML = "";
+
+  const shuffledOptions = shuffleArray([...currentQuestion.options]);
+
+  shuffledOptions.forEach(option => {
+    const button = document.createElement("button");
+    button.textContent = option;
+    button.addEventListener("click", () => checkAnswer(option));
+    optionsContainer.appendChild(button);
+  });
+
+  currentQuestionElement.textContent = currentQuestionIndex + 1;
+  updateProgressBar();
+}
+
+function checkAnswer(selectedOption) {
+  const currentQuestion = platformQuestions[currentQuestionIndex];
+  const buttons = optionsContainer.querySelectorAll("button");
+
+  buttons.forEach(button => {
+    if (button.textContent === currentQuestion.correctAnswer) {
+      button.classList.add("correct");
+    }
+    if (button.textContent === selectedOption && selectedOption !== currentQuestion.correctAnswer) {
+      button.classList.add("incorrect");
+    }
+    button.disabled = true;
+  });
+
+  if (selectedOption === currentQuestion.correctAnswer) {
+    feedbackContainer.textContent = "Correct! Well done.";
+    score++;
+  } else {
+    feedbackContainer.textContent = `Incorrect. The correct answer is: ${currentQuestion.correctAnswer}`;
   }
-  
-  function selectPlatforms(selectedPlatforms) {
-    selectedPlatformsNames = selectedPlatforms.map(p => p.charAt(0).toUpperCase() + p.slice(1));
-    platformQuestions = selectedPlatforms.flatMap(p => questions[p]);
-    platformQuestions = shuffleArray(platformQuestions);
-    totalQuestionsElement.textContent = platformQuestions.length;
+
+  nextButton.style.display = "block";
+}
+
+function nextQuestion() {
+  currentQuestionIndex++;
+  if (currentQuestionIndex < platformQuestions.length) {
     showQuestion();
-  }
-  
-  function showQuestion() {
-    const currentQuestion = platformQuestions[currentQuestionIndex];
-    questionText.textContent = currentQuestion.question;
-    optionsContainer.innerHTML = "";
-  
-    const shuffledOptions = shuffleArray([...currentQuestion.options]);
-  
-    shuffledOptions.forEach(option => {
-      const button = document.createElement("button");
-      button.textContent = option;
-      button.addEventListener("click", () => checkAnswer(option));
-      optionsContainer.appendChild(button);
-    });
-  
-    currentQuestionElement.textContent = currentQuestionIndex + 1;
-    updateProgressBar();
-  }
-  
-  function checkAnswer(selectedOption) {
-    const currentQuestion = platformQuestions[currentQuestionIndex];
-    const buttons = optionsContainer.querySelectorAll("button");
-  
-    buttons.forEach(button => {
-      if (button.textContent === currentQuestion.correctAnswer) {
-        button.classList.add("correct");
-      }
-      if (button.textContent === selectedOption && selectedOption !== currentQuestion.correctAnswer) {
-        button.classList.add("incorrect");
-      }
-      button.disabled = true;
-    });
-  
-    if (selectedOption === currentQuestion.correctAnswer) {
-      feedbackContainer.textContent = "Correct! Well done.";
-      score++;
-    } else {
-      feedbackContainer.textContent = `Incorrect. The correct answer is: ${currentQuestion.correctAnswer}`;
-    }
-  
-    nextButton.style.display = "block";
-  }
-  
-  function nextQuestion() {
-    currentQuestionIndex++;
-    if (currentQuestionIndex < platformQuestions.length) {
-      showQuestion();
-      feedbackContainer.textContent = "";
-      nextButton.style.display = "none";
-    } else {
-      endQuiz();
-    }
-  }
-  
-  function endQuiz() {
-    const percentageScore = (score / platformQuestions.length) * 100;
-    questionText.textContent = `Quiz Over! Your score is ${score} out of ${platformQuestions.length}.`;
     feedbackContainer.textContent = "";
-    scoreContainer.textContent = `You scored ${percentageScore.toFixed(2)}%. Platforms: ${selectedPlatformsNames.join(", ")}`;
-    optionsContainer.innerHTML = "";
     nextButton.style.display = "none";
-    restartButton.style.display = "block";
+  } else {
+    endQuiz();
   }
-  
-  function restartQuiz() {
-    currentQuestionIndex = 0;
-    score = 0;
-    platformQuestions = [];
-    scoreContainer.textContent = "";
-    startQuiz();
-    restartButton.style.display = "none";
-    updateProgressBar();
-  }
-  
-  function updateProgressBar() {
-    const progress = ((currentQuestionIndex + 1) / platformQuestions.length) * 100;
-    document.getElementById("progress-bar").style.width = `${progress}%`;
-  }
-  
-  function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
-  }
-  
+}
+
+function endQuiz() {
+  const percentageScore = (score / platformQuestions.length) * 100;
+  questionText.textContent = `Quiz Over! Your score is ${score} out of ${platformQuestions.length}.`;
+  feedbackContainer.textContent = "";
+  scoreContainer.textContent = `You scored ${percentageScore.toFixed(2)}%. Platforms: ${selectedPlatformsNames.join(", ")}`;
+  optionsContainer.innerHTML = "";
+  nextButton.style.display = "none";
+  restartButton.style.display = "block";
+}
+
+function restartQuiz() {
+  currentQuestionIndex = 0;
+  score = 0;
+  platformQuestions = [];
+  scoreContainer.textContent = "";
   startQuiz();
+  restartButton.style.display = "none";
+  updateProgressBar();
+}
+
+function updateProgressBar() {
+  const progress = ((currentQuestionIndex + 1) / platformQuestions.length) * 100;
+  document.getElementById("progress-bar").style.width = `${progress}%`;
+}
+
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+// Initialize quiz
+startQuiz();
